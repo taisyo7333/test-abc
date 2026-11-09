@@ -1,0 +1,15 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: test-abc
+  description: S3 reader in test
+  annotations:
+    github.com/project-slug: taisyo7333/test-abc
+    backstage.io/kubernetes-id: test-abc
+    backstage.io/kubernetes-namespace: test
+    janus-idp.io/tekton: test-abc
+    argocd/app-name: test-test-abc
+spec:
+  type: service
+  lifecycle: experimental
+  owner: cluster-admin

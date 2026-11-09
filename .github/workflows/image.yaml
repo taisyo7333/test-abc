@@ -1,0 +1,44 @@
+name: Image
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/taisyo7333/test-abc:latest
+      - name: Make the package public
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          owner=$(printf '%s' "taisyo7333")
+          name=$(printf '%s' "test-abc")
+          i=0
+          while [ "$i" -lt 6 ]; do
+            if gh api --method PUT "/orgs/${owner}/packages/container/${name}/visibility" -f visibility=public \
+              || gh api --method PUT "/user/packages/container/${name}/visibility" -f visibility=public; then
+              exit 0
+            fi
+            i=$((i + 1))
+            sleep 10
+          done
+          echo "package ${owner}/${name} stayed private" >&2
+          exit 1
